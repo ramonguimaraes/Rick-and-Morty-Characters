@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+    <color name="statusAlive">#60D665</color>
+    <color name="statusDead">#D66060</color>
+    <color name="statusUnknow">#737373</color>
+</resources>
