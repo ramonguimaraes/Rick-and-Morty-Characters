@@ -1,7 +1,8 @@
 package com.ramonguimaraes.rickandmortycharacters.view
 
 import android.os.Bundle
-import android.util.Log
+import android.os.Handler
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,26 +19,24 @@ class MainActivity : AppCompatActivity() {
     private var list: ArrayList<CharacterModel> = arrayListOf()
     private var episodes: ArrayList<EpisodeModel> = arrayListOf()
     private var layoutManager = LinearLayoutManager(this)
-    var lastPage = false
+
     var loading = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         apiViewModel = ViewModelProvider(this).get(ApiRepositoryViewModel::class.java)
+
         apiViewModel.getCharacters()
+        getEpisodes()
         observerResponse()
 
         rv_character_list.adapter = CharactersAdapter(list, episodes)
         rv_character_list.layoutManager = layoutManager
 
         rv_character_list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                //Log.e("q", newState.toString())
-            }
-
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
@@ -52,22 +51,33 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+    }
 
+    private fun getEpisodes() {
+        apiViewModel.getEpisodes()
+        apiViewModel.episodeResponse.observe(
+            this,
+            {
+                apiViewModel.getEpisodes()
+                episodes.addAll(it.results)
+                rv_character_list.adapter?.notifyDataSetChanged()
+            }
+        )
     }
 
     private fun getMoreItens() {
+        progress_circular.visibility = View.VISIBLE
         apiViewModel.getCharacters()
         apiViewModel.loading.observe(
             this,
             {
                 loading = it
+                progress_circular.visibility = View.GONE
             }
         )
     }
 
-
     fun observerResponse() {
-
         apiViewModel.reponse.observe(
             this,
             {
@@ -75,7 +85,6 @@ class MainActivity : AppCompatActivity() {
                 rv_character_list.adapter?.notifyDataSetChanged()
             }
         )
-
     }
 
 }

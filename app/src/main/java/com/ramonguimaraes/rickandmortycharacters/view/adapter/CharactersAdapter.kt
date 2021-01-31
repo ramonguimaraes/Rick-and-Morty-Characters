@@ -31,7 +31,7 @@ class CharactersAdapter(
                 ep.id == character.episodeNumber
             }?.name
 
-            itemView.character_first_see.text = episode
+            itemView.character_first_see.text = if (episode.isNullOrEmpty()) "Episode" else episode
 
             itemView.character_location.text = character.location.name
             itemView.character_status_text.text = character.status
