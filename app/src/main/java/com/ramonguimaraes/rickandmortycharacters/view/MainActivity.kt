@@ -18,9 +18,8 @@ class MainActivity : AppCompatActivity() {
     private var list: ArrayList<CharacterModel> = arrayListOf()
     private var episodes: ArrayList<EpisodeModel> = arrayListOf()
     private var layoutManager = LinearLayoutManager(this)
-    private var adapter = CharactersAdapter(list, episodes)
-    private var page = 1
-    var isLastPage: Boolean = false
+    var lastPage = false
+    var loading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,35 +27,44 @@ class MainActivity : AppCompatActivity() {
 
         apiViewModel = ViewModelProvider(this).get(ApiRepositoryViewModel::class.java)
         apiViewModel.getCharacters()
+        observerResponse()
+
+        rv_character_list.adapter = CharactersAdapter(list, episodes)
+        rv_character_list.layoutManager = layoutManager
 
         rv_character_list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                //Log.e("q", newState.toString())
+            }
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
-                val totalItemCount = layoutManager.itemCount
-                val lastVisibleItem = layoutManager.findLastCompletelyVisibleItemPosition()
+                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+                val itemCount = layoutManager.itemCount
 
-                Log.e("LastVisivlbeItem", "$lastVisibleItem")
-                Log.e("totalItemCount", "$totalItemCount")
-
-                if (lastVisibleItem == totalItemCount - 1 && !isLastPage) {
-                    apiViewModel.getCharacters()
-                    adapter.notifyDataSetChanged()
+                if (!loading) {
+                    if (lastVisibleItem == itemCount - 1) {
+                        getMoreItens()
+                        loading = true
+                    }
                 }
             }
-
         })
 
-        observerResponse()
     }
 
-
-
-    private fun loadRecyclerView() {
-        rv_character_list.adapter = CharactersAdapter(list, episodes)
-        rv_character_list.layoutManager = layoutManager
+    private fun getMoreItens() {
+        apiViewModel.getCharacters()
+        apiViewModel.loading.observe(
+            this,
+            {
+                loading = it
+            }
+        )
     }
+
 
     fun observerResponse() {
 
@@ -64,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             this,
             {
                 list.addAll(it.results)
-                loadRecyclerView()
+                rv_character_list.adapter?.notifyDataSetChanged()
             }
         )
 

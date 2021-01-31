@@ -22,12 +22,12 @@ class CharacterRepository {
                     call: Call<CharacterResponseModel>,
                     responseModel: Response<CharacterResponseModel>
                 ) {
-                    Log.e("onResponse", responseModel.body()?.results.toString())
+                    //Log.e("onResponse", responseModel.body()?.results.toString())
                     responseModel.body()?.let { characterListener.onSuccess(it) }
                 }
 
                 override fun onFailure(call: Call<CharacterResponseModel>, t: Throwable) {
-                    Log.e("onFailure", t.message.toString())
+                   // Log.e("onFailure", t.message.toString())
                     characterListener.onFailure(t.message.toString())
                 }
 
